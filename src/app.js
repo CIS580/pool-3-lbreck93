@@ -2,6 +2,7 @@
 
 /* Classes */
 const Game = require('./game');
+const Vector = require('./vector');
 
 /* Global variables */
 var canvas = document.getElementById('screen');
@@ -246,6 +247,31 @@ function update(elapsedTime) {
   });
 
   // TODO: Process ball collisions
+  collisions.forEach(function(pair){
+    //find the normal of collision
+    var collisionNormal = {
+      x: pair.a.x - pair.b.x,
+      y: pair.a.y - pair.b.y
+    }
+
+    //Rotate the problem space so thatthe normal
+    //of the collision lies along the x-axis
+    var angle = Math.atan2(collisionNormal.y,collisionNormal.x);
+    var a = Vector.rotate(pair.a, angle);
+    var b = Vector.rotate(pair.b, angle);
+
+    //solve the collision along the x-axis
+    var s = a.x;
+    a.x = b.x;
+    b.x = s;
+    //rotate the problem space back to the world space
+    a = Vector.rotate(a, -angle);
+    b = Vector.rotate(b, -angle);
+    pair.a.x = a.x;
+    pair.a.y = a.y;
+    pair.b.x = b.x;
+    pair.b.y = b.y;
+  });
 }
 
 /**
