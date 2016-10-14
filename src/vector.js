@@ -1,4 +1,4 @@
-moduule.exports = export = {
+module.exports = exports = {
   rotate: rotate,
   dotproduct: dotproduct,
   magnitude: magnitude,
@@ -6,7 +6,7 @@ moduule.exports = export = {
 }
 
 function rotate(a,angle){
-  reutnr{
+  return{
     x: a.x * Math.cos(angle) - a.y * Math.sin(angle),
     y: a.x * Math.sin(angle) + a.y * Math.cos(angle)
   }

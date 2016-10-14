@@ -3,6 +3,7 @@
 
 /* Classes */
 const Game = require('./game');
+const Vector = require('./vector');
 
 /* Global variables */
 var canvas = document.getElementById('screen');
@@ -247,6 +248,37 @@ function update(elapsedTime) {
   });
 
   // TODO: Process ball collisions
+  collisions.forEach(function(pair){
+    //find the normal of collision
+    var collisionNormal = {
+      x: pair.a.position.x - pair.b.position.x,
+      y: pair.a.position.y - pair.b.position.y
+    }
+
+    var overlap = 32- Vector.magnitude(collisionNormal)
+    var collisionNormal = Vector.normalize(collisionNormal)
+    pair.a.position.x += collisionNormal.x * overlap / 2;
+    pair.a.position.y += collisionNormal.y * overlap / 2;
+    pair.b.position.x -= collisionNormal.x * overlap / 2;
+    pair.b.position.y -= collisionNormal.y * overlap / 2;
+    //Rotate the problem space so thatthe normal
+    //of the collision lies along the x-axis
+    var angle = Math.atan2(collisionNormal.y,collisionNormal.x);
+    var a = Vector.rotate(pair.a.velocity, angle);
+    var b = Vector.rotate(pair.b.velocity, angle);
+
+    //solve the collision along the x-axis
+    var s = a.x;
+    a.x = b.x;
+    b.x = s;
+    //rotate the problem space back to the world space
+    a = Vector.rotate(a, -angle);
+    b = Vector.rotate(b, -angle);
+    pair.a.velocity.x = a.x;
+    pair.a.velocity.y = a.y;
+    pair.b.velocity.x = b.x;
+    pair.b.velocity.y = b.y;
+  });
 }
 
 /**
@@ -305,7 +337,7 @@ function render(elapsedTime, ctx) {
   ctx.beginPath();
 }
 
-},{"./game":2}],2:[function(require,module,exports){
+},{"./game":2,"./vector":3}],2:[function(require,module,exports){
 "use strict";
 
 /**
@@ -361,6 +393,35 @@ Game.prototype.loop = function(newTime) {
 
   // Flip the back buffer
   this.frontCtx.drawImage(this.backBuffer, 0, 0);
+}
+
+},{}],3:[function(require,module,exports){
+module.exports = exports = {
+  rotate: rotate,
+  dotproduct: dotproduct,
+  magnitude: magnitude,
+  normalize: normalize
+}
+
+function rotate(a,angle){
+  return{
+    x: a.x * Math.cos(angle) - a.y * Math.sin(angle),
+    y: a.x * Math.sin(angle) + a.y * Math.cos(angle)
+  }
+}
+
+function dotproduct(a,b){
+  return a.x * b.x + a.y * b.y;
+}
+
+function magnitude(a){
+  return Math.sqrt(a.x * a.x + a.y * a.y);
+}
+
+function normalize(a){
+  var mag = magnitude(a);
+
+  return {x:a.x / mag, y: a.y / mag}
 }
 
 },{}]},{},[1]);
